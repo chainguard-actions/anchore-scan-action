@@ -1,7 +1,0 @@
-{
-  "owner": "anchore",
-  "name": "scan-action",
-  "visibility": "public",
-  "description": "Scan docker containers with Grype for vulnerabilities",
-  "block_publish": false
-}
