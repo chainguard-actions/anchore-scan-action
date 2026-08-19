@@ -9,7 +9,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
 | v7.2.3 | [`v7.2.3`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.2.3) | — |
-| v7.3.0 | [`v7.3.0`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.3.0) | — |
+| v7.3.0 | [`v7.3.0`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.3.0) | [`0d444ed`](https://github.com/anchore/scan-action/commit/0d444ed77d83ee2ba7f5ced0d90d640a1281d762) |
 | v7.3.1 | [`v7.3.1`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.3.1) | — |
 | v7.4.0 | [`v7.4.0`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.4.0) | — |
 
