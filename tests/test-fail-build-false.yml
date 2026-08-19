@@ -1,0 +1,38 @@
+name: Test fail-build false does not fail on vulnerabilities
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a test directory to scan
+        run: |
+          mkdir -p /tmp/scan-no-fail
+          cat > /tmp/scan-no-fail/package.json << 'EOF'
+          {
+            "name": "test-app",
+            "version": "1.0.0",
+            "dependencies": {}
+          }
+          EOF
+
+      - id: scan
+        uses: .
+        with:
+          path: /tmp/scan-no-fail
+          output-format: table
+          fail-build: "false"
+          severity-cutoff: negligible
+
+      - name: Assert scan succeeded with fail-build false
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected action to succeed with fail-build=false, but got '$OUTCOME'"
+            exit 1
+          fi
+          echo "PASS: action succeeded with fail-build=false"

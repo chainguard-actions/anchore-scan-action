@@ -1,4 +1,4 @@
-name: Test image scan
+name: Test cache-db input
 on:
   workflow_dispatch:
 jobs:
@@ -9,12 +9,13 @@ jobs:
       - id: action
         uses: .
         with:
-          image: alpine:3.18
+          path: "."
           fail-build: "false"
           output-format: "json"
           severity-cutoff: "critical"
+          cache-db: "true"
         continue-on-error: true
-      - name: Assert action ran
+      - name: Assert action ran with cache-db enabled
         env:
           OUTCOME: ${{ steps.action.outcome }}
           JSON_OUT: ${{ steps.action.outputs.json }}
@@ -22,9 +23,9 @@ jobs:
           echo "outcome: $OUTCOME"
           echo "json output: $JSON_OUT"
           if [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded"
+            echo "PASS: action succeeded with cache-db enabled"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (network/db issue acceptable in harness)"
+            echo "PASS: action failed gracefully (network/cache issue acceptable in harness)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

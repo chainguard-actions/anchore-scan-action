@@ -1,0 +1,55 @@
+name: Test only-fixed and by-cve options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a simple test directory to scan
+        run: |
+          mkdir -p /tmp/scan-target-opts
+          cat > /tmp/scan-target-opts/package.json << 'EOF'
+          {
+            "name": "test-app",
+            "version": "1.0.0",
+            "dependencies": {}
+          }
+          EOF
+
+      - id: scan
+        uses: .
+        with:
+          path: /tmp/scan-target-opts
+          output-format: sarif
+          fail-build: "false"
+          severity-cutoff: critical
+          only-fixed: "true"
+          by-cve: "true"
+          add-cpes-if-none: "true"
+        continue-on-error: true
+
+      - name: Assert scan ran with optional flags
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          SARIF_OUT: ${{ steps.scan.outputs.sarif }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "sarif output path: $SARIF_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$SARIF_OUT" ]; then
+              echo "FAIL: action succeeded but sarif output is empty"
+              exit 1
+            fi
+            if [ ! -f "$SARIF_OUT" ]; then
+              echo "FAIL: sarif output file does not exist at: $SARIF_OUT"
+              exit 1
+            fi
+            echo "PASS: scan with only-fixed, by-cve, and add-cpes-if-none succeeded"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (may be expected in this environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

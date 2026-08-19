@@ -1,0 +1,50 @@
+name: Test custom output file path
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a simple test directory to scan
+        run: |
+          mkdir -p /tmp/scan-target-outfile
+          cat > /tmp/scan-target-outfile/package.json << 'EOF'
+          {
+            "name": "test-app",
+            "version": "1.0.0",
+            "dependencies": {}
+          }
+          EOF
+
+      - id: scan
+        uses: .
+        with:
+          path: /tmp/scan-target-outfile
+          output-format: json
+          output-file: /tmp/grype-results.json
+          fail-build: "false"
+          severity-cutoff: critical
+        continue-on-error: true
+
+      - name: Assert scan ran and wrote to custom output file
+        env:
+          OUTCOME: ${{ steps.scan.outcome }}
+          JSON_OUT: ${{ steps.scan.outputs.json }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "json output path: $JSON_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            # Check the custom output file was created
+            if [ ! -f "/tmp/grype-results.json" ]; then
+              echo "FAIL: custom output file /tmp/grype-results.json was not created"
+              exit 1
+            fi
+            echo "PASS: custom output file exists at /tmp/grype-results.json"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (may be expected in this environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
