@@ -1,4 +1,4 @@
-name: Test path scan
+name: Test CycloneDX output format
 on:
   workflow_dispatch:
 jobs:
@@ -12,25 +12,25 @@ jobs:
           path: "."
           fail-build: "false"
           severity-cutoff: "critical"
-          output-format: "sarif"
+          output-format: "cyclonedx"
         continue-on-error: true
-      - name: Assert scan ran and produced sarif output
+      - name: Assert scan produced CycloneDX XML output
         env:
           OUTCOME: ${{ steps.scan.outcome }}
-          SARIF: ${{ steps.scan.outputs.sarif }}
+          CDX_XML: ${{ steps.scan.outputs.cyclonedx-xml }}
         run: |
           echo "outcome: $OUTCOME"
-          echo "sarif output path: $SARIF"
+          echo "cyclonedx-xml output path: $CDX_XML"
           if [ "$OUTCOME" = "success" ]; then
-            if [ -z "$SARIF" ]; then
-              echo "FAIL: scan succeeded but sarif output path is empty"
+            if [ -z "$CDX_XML" ]; then
+              echo "FAIL: scan succeeded but cyclonedx-xml output path is empty"
               exit 1
             fi
-            if [ ! -f "$SARIF" ]; then
-              echo "FAIL: sarif file does not exist at $SARIF"
+            if [ ! -f "$CDX_XML" ]; then
+              echo "FAIL: cyclonedx-xml file does not exist at $CDX_XML"
               exit 1
             fi
-            echo "PASS: sarif file found at $SARIF"
+            echo "PASS: CycloneDX XML file found at $CDX_XML"
           elif [ "$OUTCOME" = "failure" ]; then
             echo "PASS: scan step failed gracefully (acceptable in harness environment)"
           else

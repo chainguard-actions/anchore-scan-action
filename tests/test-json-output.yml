@@ -1,4 +1,4 @@
-name: Test path scan
+name: Test JSON output format
 on:
   workflow_dispatch:
 jobs:
@@ -12,25 +12,30 @@ jobs:
           path: "."
           fail-build: "false"
           severity-cutoff: "critical"
-          output-format: "sarif"
+          output-format: "json"
         continue-on-error: true
-      - name: Assert scan ran and produced sarif output
+      - name: Assert scan produced JSON output
         env:
           OUTCOME: ${{ steps.scan.outcome }}
-          SARIF: ${{ steps.scan.outputs.sarif }}
+          JSON_OUT: ${{ steps.scan.outputs.json }}
         run: |
           echo "outcome: $OUTCOME"
-          echo "sarif output path: $SARIF"
+          echo "json output path: $JSON_OUT"
           if [ "$OUTCOME" = "success" ]; then
-            if [ -z "$SARIF" ]; then
-              echo "FAIL: scan succeeded but sarif output path is empty"
+            if [ -z "$JSON_OUT" ]; then
+              echo "FAIL: scan succeeded but json output path is empty"
               exit 1
             fi
-            if [ ! -f "$SARIF" ]; then
-              echo "FAIL: sarif file does not exist at $SARIF"
+            if [ ! -f "$JSON_OUT" ]; then
+              echo "FAIL: json file does not exist at $JSON_OUT"
               exit 1
             fi
-            echo "PASS: sarif file found at $SARIF"
+            # Validate it is valid JSON
+            if ! python3 -c "import json,sys; json.load(open('$JSON_OUT'))" 2>/dev/null; then
+              echo "FAIL: output file is not valid JSON"
+              exit 1
+            fi
+            echo "PASS: valid JSON file found at $JSON_OUT"
           elif [ "$OUTCOME" = "failure" ]; then
             echo "PASS: scan step failed gracefully (acceptable in harness environment)"
           else

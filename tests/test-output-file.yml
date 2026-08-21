@@ -1,4 +1,4 @@
-name: Test path scan
+name: Test output-file option
 on:
   workflow_dispatch:
 jobs:
@@ -13,8 +13,9 @@ jobs:
           fail-build: "false"
           severity-cutoff: "critical"
           output-format: "sarif"
+          output-file: "/tmp/custom-scan-results.sarif"
         continue-on-error: true
-      - name: Assert scan ran and produced sarif output
+      - name: Assert scan wrote to the specified output file
         env:
           OUTCOME: ${{ steps.scan.outcome }}
           SARIF: ${{ steps.scan.outputs.sarif }}
@@ -22,15 +23,12 @@ jobs:
           echo "outcome: $OUTCOME"
           echo "sarif output path: $SARIF"
           if [ "$OUTCOME" = "success" ]; then
-            if [ -z "$SARIF" ]; then
-              echo "FAIL: scan succeeded but sarif output path is empty"
+            # The output-file should exist at the specified path
+            if [ ! -f "/tmp/custom-scan-results.sarif" ]; then
+              echo "FAIL: expected output file /tmp/custom-scan-results.sarif not found"
               exit 1
             fi
-            if [ ! -f "$SARIF" ]; then
-              echo "FAIL: sarif file does not exist at $SARIF"
-              exit 1
-            fi
-            echo "PASS: sarif file found at $SARIF"
+            echo "PASS: output file found at /tmp/custom-scan-results.sarif"
           elif [ "$OUTCOME" = "failure" ]; then
             echo "PASS: scan step failed gracefully (acceptable in harness environment)"
           else
