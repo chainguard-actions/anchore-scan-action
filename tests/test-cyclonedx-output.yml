@@ -1,0 +1,50 @@
+name: Test path scan with CycloneDX output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          path: "."
+          output-format: "cyclonedx-xml"
+          fail-build: "false"
+          severity-cutoff: "critical"
+
+      - name: Assert cyclonedx-xml output is set
+        env:
+          CYCLONEDX_PATH: ${{ steps.action.outputs.cyclonedx-xml }}
+        run: |
+          echo "cyclonedx-xml output path: $CYCLONEDX_PATH"
+          if [ -z "$CYCLONEDX_PATH" ]; then
+            echo "FAIL: cyclonedx-xml output is empty"
+            exit 1
+          fi
+          echo "PASS: cyclonedx-xml output is set to '$CYCLONEDX_PATH'"
+
+      - name: Assert cyclonedx file exists
+        env:
+          CYCLONEDX_PATH: ${{ steps.action.outputs.cyclonedx-xml }}
+        run: |
+          echo "Checking cyclonedx file at: $CYCLONEDX_PATH"
+          if [ ! -f "$CYCLONEDX_PATH" ]; then
+            echo "FAIL: cyclonedx file does not exist at '$CYCLONEDX_PATH'"
+            exit 1
+          fi
+          echo "PASS: cyclonedx file exists"
+
+      - name: Assert cyclonedx file contains BOM content
+        env:
+          CYCLONEDX_PATH: ${{ steps.action.outputs.cyclonedx-xml }}
+        run: |
+          echo "Checking CycloneDX content..."
+          if ! grep -qi 'bom\|cyclonedx' "$CYCLONEDX_PATH" 2>/dev/null; then
+            echo "FAIL: cyclonedx file does not appear to contain CycloneDX content"
+            head -5 "$CYCLONEDX_PATH"
+            exit 1
+          fi
+          echo "PASS: cyclonedx file contains expected content"

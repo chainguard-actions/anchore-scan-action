@@ -1,4 +1,4 @@
-name: Test image scan
+name: Test basic path scan (SARIF output)
 on:
   workflow_dispatch:
 jobs:
@@ -7,13 +7,10 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Pull alpine image for scanning
-        run: docker pull alpine:3.18
-
       - id: action
         uses: .
         with:
-          image: "alpine:3.18"
+          path: "."
           output-format: "sarif"
           fail-build: "false"
           severity-cutoff: "critical"
@@ -44,3 +41,14 @@ jobs:
             exit 1
           fi
           echo "PASS: sarif file exists and is valid JSON"
+
+      - name: Assert sarif file contains expected SARIF schema
+        env:
+          SARIF_PATH: ${{ steps.action.outputs.sarif }}
+        run: |
+          echo "Checking SARIF schema..."
+          if ! grep -q 'sarif' "$SARIF_PATH" 2>/dev/null; then
+            echo "FAIL: sarif file does not appear to contain SARIF content"
+            exit 1
+          fi
+          echo "PASS: sarif file contains expected content"

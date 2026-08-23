@@ -1,0 +1,8 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://openvex.dev/docs/public/vex-test-fixture-0001",
+  "author": "test-author",
+  "timestamp": "2024-01-01T00:00:00Z",
+  "version": 1,
+  "statements": []
+}

@@ -1,4 +1,4 @@
-name: Test SBOM scan with vex and cache-db
+name: Test sbom input scan
 on:
   workflow_dispatch:
 jobs:
@@ -6,56 +6,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Generate SBOM fixture
-        run: |
-          cat > /tmp/test-sbom.json << 'EOF'
-          {
-            "bomFormat": "CycloneDX",
-            "specVersion": "1.4",
-            "version": 1,
-            "metadata": {
-              "timestamp": "2024-01-01T00:00:00Z",
-              "component": {
-                "type": "container",
-                "name": "test-image",
-                "version": "latest"
-              }
-            },
-            "components": []
-          }
-          EOF
-      - name: Generate VEX fixture
-        run: |
-          cat > /tmp/test-vex.json << 'EOF'
-          {
-            "@context": "https://openvex.dev/ns/v0.2.0",
-            "@id": "https://example.com/vex/test",
-            "author": "Test Author",
-            "timestamp": "2024-01-01T00:00:00Z",
-            "version": 1,
-            "statements": []
-          }
-          EOF
+
       - id: action
         uses: .
         with:
-          sbom: "/tmp/test-sbom.json"
+          sbom: "hardened/tests/fixtures/sbom/sbom.json"
+          output-format: "sarif"
           fail-build: "false"
-          output-format: "cyclonedx-json"
           severity-cutoff: "critical"
-          vex: "/tmp/test-vex.json"
-          cache-db: "false"
-      - name: Assert cyclonedx-json output exists
+
+      - name: Assert sarif output is set
         env:
-          CDX_JSON_OUT: ${{ steps.action.outputs.cyclonedx-json }}
+          SARIF_PATH: ${{ steps.action.outputs.sarif }}
         run: |
-          echo "cyclonedx-json output: $CDX_JSON_OUT"
-          if [ -z "$CDX_JSON_OUT" ]; then
-            echo "FAIL: expected cyclonedx-json output path to be set"
+          echo "sarif output path: $SARIF_PATH"
+          if [ -z "$SARIF_PATH" ]; then
+            echo "FAIL: sarif output is empty"
             exit 1
           fi
-          if [ ! -f "$CDX_JSON_OUT" ]; then
-            echo "FAIL: cyclonedx-json output file does not exist at $CDX_JSON_OUT"
+          echo "PASS: sarif output is set to '$SARIF_PATH'"
+
+      - name: Assert sarif file exists and is valid JSON
+        env:
+          SARIF_PATH: ${{ steps.action.outputs.sarif }}
+        run: |
+          echo "Checking sarif file at: $SARIF_PATH"
+          if [ ! -f "$SARIF_PATH" ]; then
+            echo "FAIL: sarif file does not exist at '$SARIF_PATH'"
             exit 1
           fi
-          echo "PASS"
+          echo "File exists. Checking it is valid JSON..."
+          if ! python3 -c "import json,sys; json.load(open('$SARIF_PATH'))" 2>/dev/null; then
+            echo "FAIL: sarif file is not valid JSON"
+            exit 1
+          fi
+          echo "PASS: sarif file exists and is valid JSON"

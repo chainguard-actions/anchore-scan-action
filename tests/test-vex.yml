@@ -1,4 +1,4 @@
-name: Test image scan
+name: Test vex input
 on:
   workflow_dispatch:
 jobs:
@@ -7,16 +7,14 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Pull alpine image for scanning
-        run: docker pull alpine:3.18
-
       - id: action
         uses: .
         with:
-          image: "alpine:3.18"
+          sbom: "hardened/tests/fixtures/sbom/sbom.json"
           output-format: "sarif"
           fail-build: "false"
           severity-cutoff: "critical"
+          vex: "hardened/tests/fixtures/vex/vex.json"
 
       - name: Assert sarif output is set
         env:

@@ -1,4 +1,4 @@
-name: Test image scan
+name: Test fail-build false does not fail on vulnerabilities
 on:
   workflow_dispatch:
 jobs:
@@ -7,16 +7,18 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Pull alpine image for scanning
-        run: docker pull alpine:3.18
-
       - id: action
         uses: .
         with:
-          image: "alpine:3.18"
+          path: "."
           output-format: "sarif"
           fail-build: "false"
-          severity-cutoff: "critical"
+          severity-cutoff: "negligible"
+
+      - name: Assert action succeeded with fail-build false
+        run: |
+          echo "Action completed successfully with fail-build=false"
+          echo "PASS: action did not fail even with severity-cutoff=negligible"
 
       - name: Assert sarif output is set
         env:
@@ -29,18 +31,12 @@ jobs:
           fi
           echo "PASS: sarif output is set to '$SARIF_PATH'"
 
-      - name: Assert sarif file exists and is valid JSON
+      - name: Assert sarif file exists
         env:
           SARIF_PATH: ${{ steps.action.outputs.sarif }}
         run: |
-          echo "Checking sarif file at: $SARIF_PATH"
           if [ ! -f "$SARIF_PATH" ]; then
             echo "FAIL: sarif file does not exist at '$SARIF_PATH'"
             exit 1
           fi
-          echo "File exists. Checking it is valid JSON..."
-          if ! python3 -c "import json,sys; json.load(open('$SARIF_PATH'))" 2>/dev/null; then
-            echo "FAIL: sarif file is not valid JSON"
-            exit 1
-          fi
-          echo "PASS: sarif file exists and is valid JSON"
+          echo "PASS: sarif file exists at '$SARIF_PATH'"

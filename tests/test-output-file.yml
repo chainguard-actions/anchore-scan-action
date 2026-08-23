@@ -1,0 +1,47 @@
+name: Test custom output file path
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          path: "."
+          output-format: "json"
+          output-file: "/tmp/grype-results.json"
+          fail-build: "false"
+          severity-cutoff: "critical"
+
+      - name: Assert custom output file exists
+        run: |
+          echo "Checking custom output file at /tmp/grype-results.json"
+          if [ ! -f "/tmp/grype-results.json" ]; then
+            echo "FAIL: custom output file does not exist at /tmp/grype-results.json"
+            exit 1
+          fi
+          echo "PASS: custom output file exists"
+
+      - name: Assert custom output file is valid JSON
+        run: |
+          echo "Checking if custom output file is valid JSON..."
+          if ! python3 -c "import json,sys; json.load(open('/tmp/grype-results.json'))" 2>/dev/null; then
+            echo "FAIL: custom output file is not valid JSON"
+            head -5 /tmp/grype-results.json
+            exit 1
+          fi
+          echo "PASS: custom output file is valid JSON"
+
+      - name: Assert json output also set
+        env:
+          JSON_PATH: ${{ steps.action.outputs.json }}
+        run: |
+          echo "json output path: $JSON_PATH"
+          if [ -z "$JSON_PATH" ]; then
+            echo "FAIL: json output is empty"
+            exit 1
+          fi
+          echo "PASS: json output is set to '$JSON_PATH'"

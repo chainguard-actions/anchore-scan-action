@@ -1,0 +1,54 @@
+name: Test path scan with JSON output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          path: "."
+          output-format: "json"
+          fail-build: "false"
+          severity-cutoff: "critical"
+
+      - name: Assert json output is set
+        env:
+          JSON_PATH: ${{ steps.action.outputs.json }}
+        run: |
+          echo "json output path: $JSON_PATH"
+          if [ -z "$JSON_PATH" ]; then
+            echo "FAIL: json output is empty"
+            exit 1
+          fi
+          echo "PASS: json output is set to '$JSON_PATH'"
+
+      - name: Assert json file exists and is valid JSON
+        env:
+          JSON_PATH: ${{ steps.action.outputs.json }}
+        run: |
+          echo "Checking json file at: $JSON_PATH"
+          if [ ! -f "$JSON_PATH" ]; then
+            echo "FAIL: json file does not exist at '$JSON_PATH'"
+            exit 1
+          fi
+          echo "File exists. Checking it is valid JSON..."
+          if ! python3 -c "import json,sys; json.load(open('$JSON_PATH'))" 2>/dev/null; then
+            echo "FAIL: json file is not valid JSON"
+            exit 1
+          fi
+          echo "PASS: json file exists and is valid JSON"
+
+      - name: Assert json file contains matches field
+        env:
+          JSON_PATH: ${{ steps.action.outputs.json }}
+        run: |
+          echo "Checking JSON structure..."
+          if ! python3 -c "import json,sys; data=json.load(open('$JSON_PATH')); sys.exit(0 if 'matches' in data else 1)" 2>/dev/null; then
+            echo "FAIL: json output missing matches field"
+            exit 1
+          fi
+          echo "PASS: json output contains matches field"
