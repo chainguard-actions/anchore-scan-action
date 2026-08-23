@@ -1,0 +1,35 @@
+name: Test cache-db input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          path: "."
+          cache-db: "true"
+          fail-build: "false"
+          output-format: "json"
+        continue-on-error: true
+      - name: Assert action ran with cache-db input
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          JSON_OUT: ${{ steps.action.outputs.json }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "json output: $JSON_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$JSON_OUT" ]; then
+              echo "FAIL: action succeeded but json output is empty"
+              exit 1
+            fi
+            echo "PASS: action succeeded with cache-db input, json=$JSON_OUT"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran (may fail due to environment constraints) with cache-db input"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

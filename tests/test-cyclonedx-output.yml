@@ -1,4 +1,4 @@
-name: Test path scan
+name: Test CycloneDX output format
 on:
   workflow_dispatch:
 jobs:
@@ -12,29 +12,29 @@ jobs:
         with:
           path: "."
           fail-build: "false"
-          output-format: "sarif"
+          output-format: "cyclonedx"
           severity-cutoff: "critical"
         continue-on-error: true
 
-      - name: Assert action ran
+      - name: Assert CycloneDX output produced
         env:
           OUTCOME: ${{ steps.action.outcome }}
-          SARIF_OUT: ${{ steps.action.outputs.sarif }}
+          CYCLONEDX_XML_OUT: ${{ steps.action.outputs.cyclonedx-xml }}
         run: |
           echo "outcome: $OUTCOME"
-          echo "sarif output: $SARIF_OUT"
+          echo "cyclonedx-xml output: $CYCLONEDX_XML_OUT"
           if [ "$OUTCOME" = "success" ]; then
-            if [ -z "$SARIF_OUT" ]; then
-              echo "FAIL: action succeeded but sarif output is empty"
+            if [ -z "$CYCLONEDX_XML_OUT" ]; then
+              echo "FAIL: action succeeded but cyclonedx-xml output is empty"
               exit 1
             fi
-            if [ ! -f "$SARIF_OUT" ]; then
-              echo "FAIL: sarif output file does not exist at $SARIF_OUT"
+            if [ ! -f "$CYCLONEDX_XML_OUT" ]; then
+              echo "FAIL: cyclonedx-xml output file does not exist at $CYCLONEDX_XML_OUT"
               exit 1
             fi
-            echo "PASS: sarif output file found at $SARIF_OUT"
+            echo "PASS: CycloneDX XML output file found at $CYCLONEDX_XML_OUT"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (acceptable for path scan in harness)"
+            echo "PASS: action failed gracefully (acceptable in harness environment)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

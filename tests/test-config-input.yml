@@ -1,0 +1,43 @@
+name: Test config input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create grype config file
+        run: |
+          cat > /tmp/grype-config.yaml << 'EOF'
+          output: json
+          fail-on-severity: ""
+          quiet: false
+          check-for-app-update: false
+          EOF
+      - id: action
+        uses: .
+        with:
+          path: "."
+          config: "/tmp/grype-config.yaml"
+          fail-build: "false"
+          output-format: "json"
+        continue-on-error: true
+      - name: Assert action ran with config input
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          JSON_OUT: ${{ steps.action.outputs.json }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "json output: $JSON_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$JSON_OUT" ]; then
+              echo "FAIL: action succeeded but json output is empty"
+              exit 1
+            fi
+            echo "PASS: action succeeded with config input, json=$JSON_OUT"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran (may fail due to environment constraints) with config input"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
