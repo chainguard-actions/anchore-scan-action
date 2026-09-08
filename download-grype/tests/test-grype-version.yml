@@ -1,0 +1,51 @@
+name: Test download-grype with specific version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          run: download-grype
+          grype-version: "v0.80.0"
+      - name: Assert cmd output is set
+        env:
+          CMD: ${{ steps.action.outputs.cmd }}
+        run: |
+          echo "cmd: $CMD"
+          if [ -z "$CMD" ]; then
+            echo "FAIL: expected cmd output to be set"
+            exit 1
+          fi
+          echo "PASS: cmd output is set to $CMD"
+      - name: Assert grype binary is executable
+        env:
+          CMD: ${{ steps.action.outputs.cmd }}
+        run: |
+          echo "checking binary at: $CMD"
+          if [ ! -f "$CMD" ]; then
+            echo "FAIL: grype binary not found at $CMD"
+            exit 1
+          fi
+          if [ ! -x "$CMD" ]; then
+            echo "FAIL: grype binary is not executable at $CMD"
+            exit 1
+          fi
+          echo "PASS: grype binary exists and is executable"
+      - name: Assert grype version matches requested version
+        env:
+          CMD: ${{ steps.action.outputs.cmd }}
+        run: |
+          echo "running: $CMD version"
+          VERSION_OUTPUT=$("$CMD" version 2>&1)
+          echo "version output: $VERSION_OUTPUT"
+          if echo "$VERSION_OUTPUT" | grep -q "0.80.0"; then
+            echo "PASS: grype version matches requested v0.80.0"
+          else
+            echo "FAIL: grype version does not match requested v0.80.0"
+            echo "Got: $VERSION_OUTPUT"
+            exit 1
+          fi
