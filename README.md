@@ -12,7 +12,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v7.3.0 | [`v7.3.0`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.3.0) | [`0d444ed`](https://github.com/anchore/scan-action/commit/0d444ed77d83ee2ba7f5ced0d90d640a1281d762) |
 | v7.3.1 | [`v7.3.1`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.3.1) | [`8d2fce0`](https://github.com/anchore/scan-action/commit/8d2fce09422cd6037e577f4130e9b925e9a37175) |
 | v7.4.0 | [`v7.4.0`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.4.0) | [`e116508`](https://github.com/anchore/scan-action/commit/e1165082ffb1fe366ebaf02d8526e7c4989ea9d2) |
-| v7.4.2 | [`v7.4.2`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.4.2) | — |
+| v7.4.2 | [`v7.4.2`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.4.2) | [`27805bf`](https://github.com/anchore/scan-action/commit/27805bf3b4e84b4a5c980df22ed233c00390a439) |
 
 ## Privacy
 
