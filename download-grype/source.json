@@ -2,6 +2,7 @@
   "owner": "anchore",
   "repo": "scan-action",
   "version": "v7.4.2",
+  "path": "download-grype",
   "commit_sha": "27805bf3b4e84b4a5c980df22ed233c00390a439",
   "url": "https://github.com/anchore/scan-action",
   "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",

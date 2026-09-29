@@ -1,4 +1,4 @@
-name: Test basic Grype download
+name: Test specific Grype version download
 on:
   workflow_dispatch:
 jobs:
@@ -8,6 +8,8 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: action
         uses: .
+        with:
+          grype-version: "v0.79.4"
       - name: Assert cmd output is set
         env:
           CMD: ${{ steps.action.outputs.cmd }}
@@ -28,14 +30,16 @@ jobs:
             exit 1
           fi
           echo "PASS: '$CMD' is executable"
-      - name: Assert Grype runs and shows version
+      - name: Assert Grype version matches requested version
         env:
           CMD: ${{ steps.action.outputs.cmd }}
+          EXPECTED_VERSION: "0.79.4"
         run: |
           echo "Running: $CMD version"
-          "$CMD" version
-          if [ $? -ne 0 ]; then
-            echo "FAIL: grype version command failed"
+          VERSION_OUTPUT="$("$CMD" version)"
+          echo "Version output: $VERSION_OUTPUT"
+          if ! echo "$VERSION_OUTPUT" | grep -q "$EXPECTED_VERSION"; then
+            echo "FAIL: expected version '$EXPECTED_VERSION' not found in output"
             exit 1
           fi
-          echo "PASS: grype version ran successfully"
+          echo "PASS: grype version '$EXPECTED_VERSION' confirmed"

@@ -1,4 +1,4 @@
-name: Test download-grype with cache-db enabled
+name: Test Grype download with cache-db enabled
 on:
   workflow_dispatch:
 jobs:
@@ -9,7 +9,6 @@ jobs:
       - id: action
         uses: .
         with:
-          run: download-grype
           cache-db: "true"
       - name: Assert cmd output is set
         env:
@@ -17,28 +16,28 @@ jobs:
         run: |
           echo "cmd: $CMD"
           if [ -z "$CMD" ]; then
-            echo "FAIL: expected cmd output to be set"
+            echo "FAIL: cmd output is empty"
             exit 1
           fi
-          echo "PASS: cmd output is set to $CMD"
-      - name: Assert grype binary is executable
+          echo "PASS: cmd output is set to '$CMD'"
+      - name: Assert cmd is executable
         env:
           CMD: ${{ steps.action.outputs.cmd }}
         run: |
-          echo "checking binary at: $CMD"
-          if [ ! -f "$CMD" ]; then
-            echo "FAIL: grype binary not found at $CMD"
-            exit 1
-          fi
+          echo "Checking if '$CMD' is executable..."
           if [ ! -x "$CMD" ]; then
-            echo "FAIL: grype binary is not executable at $CMD"
+            echo "FAIL: '$CMD' is not executable or does not exist"
             exit 1
           fi
-          echo "PASS: grype binary exists and is executable"
-      - name: Assert grype runs successfully with cache-db enabled
+          echo "PASS: '$CMD' is executable"
+      - name: Assert Grype runs successfully with cache-db enabled
         env:
           CMD: ${{ steps.action.outputs.cmd }}
         run: |
-          echo "running: $CMD version"
+          echo "Running: $CMD version"
           "$CMD" version
-          echo "PASS: grype version ran successfully with cache-db enabled"
+          if [ $? -ne 0 ]; then
+            echo "FAIL: grype version command failed"
+            exit 1
+          fi
+          echo "PASS: grype ran successfully with cache-db enabled"

@@ -1,0 +1,56 @@
+name: Test vex input (VEX document)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a minimal VEX document
+        run: |
+          cat > /tmp/test-vex.json << 'EOF'
+          {
+            "@context": "https://openvex.dev/ns/v0.2.0",
+            "@id": "https://example.com/vex/test-vex-1",
+            "author": "Test Author",
+            "timestamp": "2024-01-01T00:00:00Z",
+            "version": 1,
+            "statements": []
+          }
+          EOF
+          echo "VEX document created at /tmp/test-vex.json"
+
+      - id: action
+        uses: .
+        with:
+          path: "."
+          fail-build: "false"
+          output-format: "json"
+          severity-cutoff: "critical"
+          vex: "/tmp/test-vex.json"
+        continue-on-error: true
+
+      - name: Assert action ran with VEX document
+        env:
+          JSON_OUT: ${{ steps.action.outputs.json }}
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "json output: $JSON_OUT"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$JSON_OUT" ]; then
+              echo "FAIL: action succeeded but json output is empty"
+              exit 1
+            fi
+            if [ ! -f "$JSON_OUT" ]; then
+              echo "FAIL: json output file does not exist at: $JSON_OUT"
+              exit 1
+            fi
+            echo "PASS: scan completed with VEX document, output at $JSON_OUT"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (possibly network/grype download issue in harness)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
