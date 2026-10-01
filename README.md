@@ -11,6 +11,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v7.2.3 | [`v7.2.3`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.2.3) | [`62b74fb`](https://github.com/anchore/scan-action/commit/62b74fb7bb810d2c45b1865f47a77655621862a5) |
 | v7.3.0 | [`v7.3.0`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.3.0) | [`0d444ed`](https://github.com/anchore/scan-action/commit/0d444ed77d83ee2ba7f5ced0d90d640a1281d762) |
 | v7.3.1 | [`v7.3.1`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.3.1) | [`8d2fce0`](https://github.com/anchore/scan-action/commit/8d2fce09422cd6037e577f4130e9b925e9a37175) |
+| v7.3.2 | [`v7.3.2`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.3.2) | [`7037fa0`](https://github.com/anchore/scan-action/commit/7037fa011853d5a11690026fb85feee79f4c946c) |
 | v7.4.0 | [`v7.4.0`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.4.0) | [`e116508`](https://github.com/anchore/scan-action/commit/e1165082ffb1fe366ebaf02d8526e7c4989ea9d2) |
 | v7.4.2 | [`v7.4.2`](https://github.com/chainguard-actions/anchore-scan-action/tree/v7.4.2) | [`27805bf`](https://github.com/anchore/scan-action/commit/27805bf3b4e84b4a5c980df22ed233c00390a439) |
 
