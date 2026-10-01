@@ -1,0 +1,49 @@
+name: Test specific Grype version download
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          grype-version: "v0.74.0"
+      - name: Assert cmd output is set
+        env:
+          CMD: ${{ steps.action.outputs.cmd }}
+        run: |
+          echo "cmd: $CMD"
+          if [ -z "$CMD" ]; then
+            echo "FAIL: expected cmd output to be set"
+            exit 1
+          fi
+          echo "PASS: cmd is set to '$CMD'"
+      - name: Assert binary exists and is executable
+        env:
+          CMD: ${{ steps.action.outputs.cmd }}
+        run: |
+          echo "Checking binary at: $CMD"
+          if [ ! -f "$CMD" ]; then
+            echo "FAIL: binary not found at '$CMD'"
+            exit 1
+          fi
+          if [ ! -x "$CMD" ]; then
+            echo "FAIL: binary at '$CMD' is not executable"
+            exit 1
+          fi
+          echo "PASS: binary exists and is executable"
+      - name: Assert correct version was installed
+        env:
+          CMD: ${{ steps.action.outputs.cmd }}
+        run: |
+          echo "Running: $CMD version"
+          OUTPUT="$("$CMD" version 2>&1 || true)"
+          echo "Output: $OUTPUT"
+          if echo "$OUTPUT" | grep -q "0.74.0"; then
+            echo "PASS: correct version 0.74.0 is installed"
+          else
+            echo "FAIL: expected version 0.74.0 in output, got: $OUTPUT"
+            exit 1
+          fi
