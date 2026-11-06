@@ -4,8 +4,13 @@
   "version": "v7.4.0",
   "commit_sha": "e1165082ffb1fe366ebaf02d8526e7c4989ea9d2",
   "url": "https://github.com/anchore/scan-action",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
   "test_agent_version": "2",
-  "harden_agent_version": "2"
+  "harden_agent_version": "2",
+  "dist_artifact": {
+    "gcs_uri": "gs://patch-actions-node-artifacts/dist-artifacts/anchore/scan-action/v7.4.0/sha256-72712be4687aba427ba07fc599d64b7d33d516cc7cd2962c7fd4e2905a268431.tar.gz",
+    "sha256": "72712be4687aba427ba07fc599d64b7d33d516cc7cd2962c7fd4e2905a268431",
+    "size_bytes": 427087
+  }
 }
